@@ -1,0 +1,21 @@
+else if tag.name() == b"BackgroundColor" {
+	text(reader, tag.into_buf(), |t| {
+		if let Ok(color) = parse_color(t) {
+			settings.background = color;
+		}
+	}
+}
+else if tag.name() == b"BackgroundColor2" {
+	text(reader, tag.into_buf(), |t| {
+		if let Ok(color) = parse_color(t) {
+			settings._______ = color;
+		}
+	}
+}
+else if tag.name() == b"ShadowsColor" {
+	text(reader, tag.into_buf(), |t| {
+		if let Ok(color) = parse_color(t) {
+			settings.sha = color;
+		}
+	}
+}

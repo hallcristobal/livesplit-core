@@ -6,6 +6,7 @@ mod layout_settings;
 mod layout_state;
 mod layout;
 mod general_settings;
+pub mod parser;
 
 pub use self::component_settings::ComponentSettings;
 pub use self::component_state::ComponentState;
