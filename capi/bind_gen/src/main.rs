@@ -14,6 +14,7 @@ mod node;
 mod python;
 mod ruby;
 mod swift;
+mod typings;
 mod typescript;
 mod wasm;
 
@@ -316,6 +317,10 @@ fn write_files(classes: &BTreeMap<String, Class>, opt: &Opt) -> Result<()> {
 
         path.push("livesplit_core.ts");
         node::write(BufWriter::new(File::create(&path)?), classes, true)?;
+        path.pop();
+
+        path.push("livesplit_core.d.ts");
+        typings::write(BufWriter::new(File::create(&path)?), classes)?;
         path.pop();
     }
     path.pop();
