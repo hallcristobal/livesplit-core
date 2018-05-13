@@ -2,6 +2,7 @@
 //! other settings.
 
 mod alignment;
+mod alternating;
 mod color;
 mod field;
 mod gradient;
@@ -10,6 +11,7 @@ mod settings_description;
 mod value;
 
 pub use self::alignment::Alignment;
+pub use self::alternating::Alternating;
 pub use self::color::Color;
 pub use self::field::Field;
 pub use self::gradient::Gradient;

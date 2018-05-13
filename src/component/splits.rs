@@ -7,7 +7,7 @@
 
 use analysis::split_color;
 use serde_json::{to_writer, Result};
-use settings::{Color, Field, Gradient, SemanticColor, SettingsDescription, Value};
+use settings::{Alternating, Color, Field, Gradient, SemanticColor, SettingsDescription, Value};
 use std::borrow::Cow;
 use std::cmp::{max, min};
 use std::io::Write;
@@ -56,6 +56,12 @@ pub struct Settings {
     /// The gradient to show behind the current segment as an indicator of it
     /// being the current segment.
     pub current_split_gradient: Gradient,
+    /// The option to select between a single color or alternating.
+    pub alternating: Alternating,
+    /// The gradient to show behind the splits component.
+    pub split_gradient1: Gradient,
+    /// The gradient to show behind the alternate split component if set to Alternating.
+    pub split_gradient2: Gradient,
 }
 
 /// The state object that describes a single segment's information to visualize.
@@ -78,6 +84,8 @@ pub struct SplitState {
     /// differ from the index of this `SplitState` in the `State` object, as
     /// there can be a scrolling window, showing only a subset of segments.
     pub index: usize,
+    /// The background color for the split.
+    pub background: Gradient,
 }
 
 /// Describes the icon to be shown for a certain segment. This is provided
@@ -125,6 +133,9 @@ impl Default for Settings {
                 Color::from((51.0 / 255.0, 115.0 / 255.0, 244.0 / 255.0, 1.0)),
                 Color::from((21.0 / 255.0, 53.0 / 255.0, 116.0 / 255.0, 1.0)),
             ),
+            alternating: Alternating::Alternating,
+            split_gradient1: Gradient::Transparent,
+            split_gradient2: Gradient::Plain(Color::from((0.0, 0.0, 0.0, 0.04))),
         }
     }
 }
@@ -233,6 +244,9 @@ impl Component {
             && skip_count + take_count + 1 < timer.run().len();
 
         let mut icon_changes = Vec::new();
+        let alternating = self.settings.alternating;
+        let (background_color1, background_color2) =
+            (self.settings.split_gradient1, self.settings.split_gradient2);
 
         State {
             splits: timer
@@ -278,6 +292,17 @@ impl Component {
                     };
 
                     let visual_color = semantic_color.visualize(layout_settings);
+                    
+                    let background_color = match alternating {
+                        Alternating::Alternating => {
+                            if i % 2 == 1 {
+                                background_color2
+                            } else {
+                                background_color1
+                            }
+                        }
+                        Alternating::Single => background_color1,
+                    };
 
                     if let Some(icon_change) = segment.icon().check_for_change(icon_id) {
                         icon_changes.push(IconChange {
@@ -294,6 +319,7 @@ impl Component {
                         visual_color,
                         is_current_split: Some(i) == current_split,
                         index: i,
+                        background: background_color,
                     }
                 })
                 .collect(),
@@ -327,6 +353,15 @@ impl Component {
                 "Current Split Gradient".into(),
                 self.settings.current_split_gradient.into(),
             ),
+            Field::new("Background Type".into(), self.settings.alternating.into()),
+            Field::new(
+                "Splits Gradient 1".into(),
+                self.settings.split_gradient1.into(),
+            ),
+            Field::new(
+                "Splits Gradient 2".into(),
+                self.settings.split_gradient2.into(),
+            ),
         ])
     }
 
@@ -344,6 +379,9 @@ impl Component {
             2 => self.settings.always_show_last_split = value.into(),
             3 => self.settings.separator_last_split = value.into(),
             4 => self.settings.current_split_gradient = value.into(),
+            5 => self.settings.alternating = value.into(),
+            6 => self.settings.split_gradient1 = value.into(),
+            7 => self.settings.split_gradient2 = value.into(),
             _ => panic!("Unsupported Setting Index"),
         }
     }

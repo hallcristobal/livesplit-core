@@ -1,4 +1,4 @@
-use super::{Alignment, Color, Gradient};
+use super::{Alignment, Alternating, Color, Gradient};
 use std::result::Result as StdResult;
 use time::formatter::{Accuracy, DigitsFormat};
 use TimingMethod;
@@ -35,6 +35,8 @@ pub enum Value {
     Gradient(Gradient),
     /// An alignment for the Title Component's title.
     Alignment(Alignment),
+    /// Background type for Splits Component.
+    Alternating(Alternating),
 }
 
 quick_error! {
@@ -154,6 +156,14 @@ impl Value {
             _ => Err(Error::WrongType),
         }
     }
+
+    /// Tries to convert the value into an alternating.
+    pub fn into_alternating(self) -> Result<Alternating> {
+        match self {
+            Value::Alternating(v) => Ok(v),
+            _ => Err(Error::WrongType),
+        }
+    }
 }
 
 impl Into<bool> for Value {
@@ -231,5 +241,11 @@ impl Into<Gradient> for Value {
 impl Into<Alignment> for Value {
     fn into(self) -> Alignment {
         self.into_alignment().unwrap()
+    }
+}
+
+impl Into<Alternating> for Value {
+    fn into(self) -> Alternating {
+        self.into_alternating().unwrap()
     }
 }
